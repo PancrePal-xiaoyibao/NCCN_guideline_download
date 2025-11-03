@@ -1,0 +1,15 @@
+curl 'https://www.nccn.org/global/what-we-do/guidelines-for-patients-translations' \
+  -H 'accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7' \
+  -H 'accept-language: zh-CN,zh;q=0.9' \
+  -b 'sf-data-intell-subject=1758269331432-930bcf2a-1a84-40a7-9b29-77e2df5dcd1a; _gcl_gs=2.1.k1$i1758269329$u136356015; PDFSession=ade9ea33-7943-4f72-ab16-78f014d840e9; _gcl_aw=GCL.1758271906.Cj0KCQjw_rPGBhCbARIsABjq9ccsi05BOa2xjnv5bhJfpXkE9GZjxcCLXndEqBCqavnVipgTpSzwTQQaAjxqEALw_wcB; _ga=GA1.1.870379682.1758269332; _ga_ZW3B1HSLH0=GS2.1.s1758276390$o1$g1$t1758276570$j19$l0$h0; ASP.NET_SessionId=woudodkimh5sywt1yjqog0b2; sf-prs-ss=638974242536060000; sf-prs-lu=https%3A%2F%2Fwww.nccn.org%2Flogin%3FReturnURL%3Dhttps%3A%2F%2Fwww.nccn.org%2Fprofessionals%2Fphysician_gls%2Fpdf%2Folder_adult.pdf; IsNCCNUser=False; ExternalCookie_qinxiaoqiang@gmail.com=isreturnedmail=False&iseulaexpired=False&customerguid=5738011d-f83f-4caf-b29a-810062206162&sessionguid=5ffee638-061a-4e23-8750-51e403856e8f&customerid=4015118&IsPasswordExpired=False&IsPasswordExpiredWarning=False&PasswordExpiredDays=0; username=qinxiaoqiang@gmail.com; isreturnedmail=False; iseulaexpired=False; customerguid=5738011d-f83f-4caf-b29a-810062206162; sessionguid=69906a2b-a3d6-406d-9b6c-12f92b57cb6a; customerid=4015118; IsCustomerOfMemInst=False; IsCOIMember=False; IsBoardMember=False; IsBestPractices=False; IsProductsServices=False; IsPharmacyDirectors=False; IsBoardMemberAdmin=False; IsPasswordExpired=False; IsPasswordExpiredWarning=False; PasswordExpiredDays=0; perf_dv6Tr4n=1; sf-ins-ssid=1761916465337-c4578d62-40c4-47ea-acdf-de53c5c88a9d; .AspNet.Cookies=Na8_OOOQnM5mMMFs2pkq9RJ1wtO427dOapLjo76iTsq_UxvLAesY_Fu9M99onWQGRJx3qKIVO39aJfNgaypddayV5llQa7c-4ykO58YhcFDBuTqbyobVZa1oaBRFSDEYbiBtTXx53KJLV1GsubWd2scqQAoOX0Jk66EYKsQAwTP9VYdmDWtDPSiu1PNwyzmZtGBKwCg77JzJLxMlTaTWP4iOR1QUrJHib_ClsRa-cf_KqWDDrP1GW3s_YM-WGYkZxf2gxUe-QQdkBCOiXpBRfqwFngR72g_UzDilP1SswOCKVVl6P0c_nRw4aCQHzOy7TbZg3zOjWImUl_bO_gQBwDfV0wMg1nL6ve7PvP1HwZAW5Zu-kYOyGTQX3RDxjBTkR4i22OU7_Lzl9BhYDPWEhjWMP87YItyZC4VVGYZ8GSelrMl53ov5GXbUjCz-HnSG_SrrURtUiIbWoo3giys-IfScDO9OOPPSzYf4-YF5g52Jjpc22B97uchgewxNc2ZQiRbbm3QkOOi25BF7GWk3xlEXr4Ny5Ro58nRZNEnFKT3hpnOWOiIGFxAwy8CrZWEsSHoglk6r0R6bOgrYWpcHuBVq1rUpjqJNdEGmwecnTag5evNijBHIlN5On_kBhtiO5mktEof4lchKCtX5Q5wI3hNvzYsSfoMbZM2QVwkOcXIOu_w2hLsc_NT6NhI162nF2mlrT7Ere-p-qn4Eo0MGUw; sf-ins-pv-id=36f1bbe4-bacc-4e18-b0fe-9e4bd3f69ef2; _ga_M17RCDNCCD=GS2.1.s1761916465$o6$g1$t1761917242$j41$l0$h0' \
+  -H 'priority: u=0, i' \
+  -H 'referer: https://www.nccn.org/patientresources/patient-resources/guidelines-for-patients' \
+  -H 'sec-ch-ua: "Google Chrome";v="141", "Not?A_Brand";v="8", "Chromium";v="141"' \
+  -H 'sec-ch-ua-mobile: ?0' \
+  -H 'sec-ch-ua-platform: "macOS"' \
+  -H 'sec-fetch-dest: document' \
+  -H 'sec-fetch-mode: navigate' \
+  -H 'sec-fetch-site: same-origin' \
+  -H 'sec-fetch-user: ?1' \
+  -H 'upgrade-insecure-requests: 1' \
+  -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36'
