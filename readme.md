@@ -259,3 +259,4 @@ tail -f nccn_downloads/logs/download_$(date +%Y%m%d).log
 ---
 
 **感谢使用NCCN指南下载工具v2.0!**
+感谢小x宝社区志愿者用❤️发电。
