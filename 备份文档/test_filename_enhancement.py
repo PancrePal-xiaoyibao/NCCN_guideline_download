@@ -1,0 +1,146 @@
+#!/usr/bin/env python3
+"""
+测试修复后的文件名增强功能
+验证从PDF URL提取原始文件名并结合版本信息
+"""
+
+import sys
+import os
+from pathlib import Path
+
+# 添加当前目录到Python路径
+sys.path.insert(0, str(Path(__file__).parent))
+
+def test_filename_enhancement():
+    """测试修复后的文件名增强功能"""
+    print("🧪 测试修复后的文件名增强功能...")
+    print("=" * 60)
+
+    try:
+        # 初始化下载器
+        from download_NCCN_Guide_v2_menu import NCCNDownloaderV2
+        import json
+
+        # 读取配置文件
+        with open('config.json', 'r', encoding='utf-8') as f:
+            config_data = json.load(f)
+
+        downloader = NCCNDownloaderV2(config_data)
+
+        # 测试案例
+        test_cases = [
+            {
+                'title': 'NCCN Guidelines',
+                'version_info': '1_2026',
+                'pdf_url': 'https://www.nccn.org/professionals/physician_gls/pdf/cll.pdf',
+                'expected': 'cll_version_1_2026.pdf'
+            },
+            {
+                'title': 'NCCN Guidelines (Version 2.2025)',
+                'version_info': '2_2025',
+                'pdf_url': 'https://www.nccn.org/files/content/guidelinespdf/materials/2026/AML-2026.pdf',
+                'expected': 'AML-2026_version_2_2025.pdf'
+            },
+            {
+                'title': 'Acute Myeloid Leukemia Guidelines',
+                'version_info': '3_2025',
+                'pdf_url': 'https://www.nccn.org/professionals/physician_gls/pdf/aml.pdf',
+                'expected': 'aml_version_3_2025.pdf'
+            },
+            {
+                'title': 'NCCN Guidelines',
+                'version_info': 'unknown',
+                'pdf_url': 'https://www.nccn.org/professionals/physician_gls/pdf/nsclc.pdf',
+                'expected': 'nsclc.pdf'
+            }
+        ]
+
+        print("🧪 测试用例:")
+        all_passed = True
+
+        for i, test_case in enumerate(test_cases, 1):
+            print(f"\n📋 测试用例 {i}:")
+            print(f"   标题: {test_case['title']}")
+            print(f"   版本: {test_case['version_info']}")
+            print(f"   URL: {test_case['pdf_url']}")
+            print(f"   期望: {test_case['expected']}")
+
+            # 调用增强文件名方法
+            enhanced_info = downloader._enhance_pdf_info(
+                test_case['title'],
+                test_case['version_info'],
+                test_case['pdf_url']
+            )
+
+            actual_filename = enhanced_info['enhanced_filename']
+            actual_title = enhanced_info['title']
+
+            print(f"   实际文件名: {actual_filename}")
+            print(f"   实际标题: {actual_title}")
+
+            # 验证结果
+            if actual_filename == test_case['expected']:
+                print(f"   ✅ 通过")
+            else:
+                print(f"   ❌ 失败")
+                all_passed = False
+
+        return all_passed
+
+    except Exception as e:
+        print(f"❌ 测试失败: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return False
+
+def test_url_parsing():
+    """测试URL解析功能"""
+    print(f"\n🔍 测试URL解析功能:")
+    print("=" * 60)
+
+    test_urls = [
+        'https://www.nccn.org/professionals/physician_gls/pdf/cll.pdf',
+        'https://www.nccn.org/files/content/guidelinespdf/materials/2026/AML-2026.pdf',
+        '/professionals/physician_gls/pdf/nsclc.pdf',
+        'https://example.com/path/to/document_version_2_2025.pdf'
+    ]
+
+    for i, url in enumerate(test_urls, 1):
+        print(f"\n📋 URL {i}: {url}")
+
+        try:
+            from urllib.parse import urlparse
+            import os
+
+            parsed_url = urlparse(url)
+            path = parsed_url.path
+            filename = os.path.basename(path)
+
+            if filename and '.' in filename:
+                file_prefix = os.path.splitext(filename)[0]
+                print(f"   解析结果: {filename} -> {file_prefix}")
+            else:
+                print(f"   解析失败: 无法提取有效文件名")
+
+        except Exception as e:
+            print(f"   解析错误: {str(e)}")
+
+if __name__ == "__main__":
+    print("🎯 测试文件名增强功能")
+    print("验证从PDF URL提取原始文件名并结合版本信息")
+    print("=" * 60)
+
+    success = test_filename_enhancement()
+    test_url_parsing()
+
+    print(f"\n{'='*60}")
+    if success:
+        print("🎉 所有测试通过！")
+        print("✅ 修复后的文件名生成逻辑工作正常")
+        print("✅ 能够正确从PDF URL提取原始文件名")
+        print("✅ 正确结合版本信息生成增强文件名")
+        print("🚀 现在运行: python download_NCCN_Guide_v2_menu.py")
+        print("   选择选项1，验证新的文件名生成效果")
+    else:
+        print("⚠️ 部分测试失败")
+        print("🔧 需要进一步调试")
