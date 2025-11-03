@@ -17,7 +17,7 @@ NCCN下载工具支持使用Cookie进行认证，避免每次都要输入用户�
    - 切换到"Application"（应用）标签页
    - 在左侧菜单中选择"Storage"→"Cookies"→"https://www.nccn.org"
    - 在右侧面板中查看所有Cookie
-https://picgo-1302991947.cos.ap-guangzhou.myqcloud.com/images/20251101174057062.png
+![](https://picgo-1302991947.cos.ap-guangzhou.myqcloud.com/images/20251101174057062.png)
 
 
 
