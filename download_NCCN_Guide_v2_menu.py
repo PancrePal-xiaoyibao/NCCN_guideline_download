@@ -97,6 +97,9 @@ class ThemeConfig:
 class NCCNDownloaderV2:
     """NCCN下载器 v2.0"""
 
+    # 允许的下载域名白名单（防止从 NCCN 页面抓取到的恶意链接被下载）
+    ALLOWED_DOWNLOAD_DOMAINS = ('nccn.org',)
+
     # 主题配置
     THEMES = {
         '1': ThemeConfig(
@@ -159,6 +162,115 @@ class NCCNDownloaderV2:
         '2': 'cookie'
     }
 
+    # 简化后的语言筛选：兼容旧代码中的 english/chinese/all
+    LANGUAGE_GROUPS = {
+        '0': 'chinese',
+        '1': 'english',
+        '2': 'other',
+        '3': 'all',
+        'zh': 'chinese',
+        'cn': 'chinese',
+        'chinese': 'chinese',
+        'en': 'english',
+        'english': 'english',
+        'ja': 'other',
+        'jp': 'other',
+        'japanese': 'other',
+        'other': 'other',
+        'all': 'all',
+    }
+
+    LANGUAGE_GROUP_LABELS = {
+        'chinese': '中文',
+        'english': '英文',
+        'other': '日语/其他语言',
+        'all': '全部',
+    }
+
+    # 内置癌种关键词：完整 NCCN 癌种列表（从官网提取，含中英文别名）
+    # key=英文主键, value=[英文关键词..., 中文关键词...]
+    CANCER_TYPE_FILTERS = {
+        'all': ['all', '全部', '所有'],
+        'acute_lymphoblastic_leukemia': ['acute lymphoblastic leukemia', 'all', '急性淋巴细胞白血病', '急淋'],
+        'acute_myeloid_leukemia': ['acute myeloid leukemia', 'aml', '急性髓系白血病', '急髓'],
+        'ampullary_adenocarcinoma': ['ampullary adenocarcinoma', 'ampullary', '壶腹腺癌', '壶腹'],
+        'anal_carcinoma': ['anal carcinoma', 'anal', '肛门癌', '肛门'],
+        'appendiceal_neoplasms': ['appendiceal neoplasms', 'appendiceal', 'appendix', '阑尾肿瘤', '阑尾'],
+        'basal_cell_skin_cancer': ['basal cell skin cancer', 'basal cell', '基底细胞皮肤癌', '基底细胞癌'],
+        'b_cell_lymphomas': ['b-cell lymphomas', 'b-cell lymphoma', 'b细胞淋巴瘤'],
+        'biliary_tract_cancers': ['biliary tract cancers', 'biliary', '胆道癌', '胆道'],
+        'bladder_cancer': ['bladder cancer', 'bladder', '膀胱癌', '膀胱'],
+        'bone_cancer': ['bone cancer', 'bone', '骨癌', '骨肿瘤'],
+        'breast_cancer': ['breast cancer', 'breast', '乳腺癌', '乳腺'],
+        'castleman_disease': ['castleman disease', 'castleman', '卡斯尔曼病'],
+        'central_nervous_system_cancers': ['central nervous system cancers', 'cns', '中枢神经系统肿瘤', '中枢神经', '脑'],
+        'cervical_cancer': ['cervical cancer', 'cervical', '宫颈癌', '宫颈'],
+        'chronic_lymphocytic_leukemia': ['chronic lymphocytic leukemia', 'small lymphocytic lymphoma', 'cll', 'sll', '慢性淋巴细胞白血病', '慢淋'],
+        'chronic_myeloid_leukemia': ['chronic myeloid leukemia', 'cml', '慢性髓系白血病', '慢髓'],
+        'colon_cancer': ['colon cancer', 'colon', '结肠癌', '结肠'],
+        'cutaneous_lymphomas': ['cutaneous lymphomas', 'cutaneous lymphoma', '皮肤淋巴瘤'],
+        'dermatofibrosarcoma_protuberans': ['dermatofibrosarcoma protuberans', 'dfsp', '隆突性皮肤纤维肉瘤'],
+        'esophageal_cancers': ['esophageal and esophagogastric junction cancers', 'esophageal', 'esophagogastric', '食管癌', '食管', '食管胃结合部'],
+        'gastric_cancer': ['gastric cancer', 'gastric', 'stomach', '胃癌', '胃'],
+        'gastrointestinal_stromal_tumors': ['gastrointestinal stromal tumors', 'gist', '胃肠道间质瘤', '间质瘤'],
+        'gestational_trophoblastic_neoplasia': ['gestational trophoblastic neoplasia', 'gtn', '妊娠滋养细胞肿瘤', '滋养细胞'],
+        'hairy_cell_leukemia': ['hairy cell leukemia', 'hairy cell', '毛细胞白血病'],
+        'head_and_neck_cancers': ['head and neck cancers', 'head', 'neck', '头颈癌', '头颈'],
+        'hepatobiliary_cancers': ['hepatobiliary cancers', 'hepatobiliary', '肝胆癌', '肝胆'],
+        'hepatocellular_carcinoma': ['hepatocellular carcinoma', 'hcc', '肝细胞癌', '肝癌', '肝'],
+        'histiocytic_neoplasms': ['histiocytic neoplasms', 'histiocytic', '组织细胞肿瘤'],
+        'hodgkin_lymphoma': ['hodgkin lymphoma', 'hodgkin', '霍奇金淋巴瘤', '霍奇金'],
+        'kaposi_sarcoma': ['kaposi sarcoma', 'kaposi', '卡波西肉瘤'],
+        'kidney_cancer': ['kidney cancer', 'kidney', 'renal', '肾癌', '肾'],
+        'melanoma_cutaneous': ['melanoma: cutaneous', 'cutaneous melanoma', 'melanoma', '皮肤黑色素瘤', '黑色素瘤'],
+        'melanoma_uveal': ['melanoma: uveal', 'uveal melanoma', '葡萄膜黑色素瘤'],
+        'merkel_cell_carcinoma': ['merkel cell carcinoma', 'merkel', '默克尔细胞癌'],
+        'mesothelioma_peritoneal': ['mesothelioma: peritoneal', 'peritoneal mesothelioma', '腹膜间皮瘤'],
+        'mesothelioma_pleural': ['mesothelioma: pleural', 'pleural mesothelioma', '胸膜间皮瘤', '间皮瘤'],
+        'multiple_myeloma': ['multiple myeloma', 'myeloma', '多发性骨髓瘤', '骨髓瘤'],
+        'myelodysplastic_syndromes': ['myelodysplastic syndromes', 'mds', '骨髓增生异常综合征'],
+        'myeloid_lymphoid_neoplasms': ['myeloid/lymphoid neoplasms with eosinophilia', 'myeloid lymphoid', '髓系/淋系肿瘤', '嗜酸性粒细胞'],
+        'myeloproliferative_neoplasms': ['myeloproliferative neoplasms', 'mpn', '骨髓增殖性肿瘤'],
+        'neuroblastoma': ['neuroblastoma', '神经母细胞瘤'],
+        'neuroendocrine_adrenal_tumors': ['neuroendocrine and adrenal tumors', 'neuroendocrine', 'adrenal', '神经内分泌肿瘤', '肾上腺肿瘤'],
+        'non_small_cell_lung_cancer': ['non-small cell lung cancer', 'nsclc', 'lung', '非小细胞肺癌', '肺癌', '肺'],
+        'occult_primary': ['occult primary', '隐匿性原发癌', '原发不明'],
+        'ovarian_cancer': ['ovarian cancer', 'fallopian tube cancer', 'primary peritoneal cancer', 'ovarian', '卵巢癌', '输卵管癌', '腹膜癌', '卵巢'],
+        'pancreatic_adenocarcinoma': ['pancreatic adenocarcinoma', 'pancreatic', 'pancreas', '胰腺腺癌', '胰腺癌', '胰腺'],
+        'pediatric_all': ['pediatric acute lymphoblastic leukemia', '儿童急性淋巴细胞白血病', '儿童急淋'],
+        'pediatric_b_cell_lymphoma': ['pediatric aggressive mature b-cell lymphomas', '儿童侵袭性成熟b细胞淋巴瘤'],
+        'pediatric_cns': ['pediatric central nervous system cancers', '儿童中枢神经系统肿瘤'],
+        'pediatric_hodgkin': ['pediatric hodgkin lymphoma', '儿童霍奇金淋巴瘤'],
+        'pediatric_soft_tissue_sarcoma': ['pediatric soft tissue sarcoma', '儿童软组织肉瘤'],
+        'penile_cancer': ['penile cancer', 'penile', '阴茎癌', '阴茎'],
+        'prostate_cancer': ['prostate cancer', 'prostate', '前列腺癌', '前列腺'],
+        'rectal_cancer': ['rectal cancer', 'rectal', 'rectum', '直肠癌', '直肠'],
+        'small_bowel_adenocarcinoma': ['small bowel adenocarcinoma', 'small bowel', '小肠腺癌', '小肠'],
+        'small_cell_lung_cancer': ['small cell lung cancer', 'sclc', 'lung', '小细胞肺癌', '肺癌', '肺'],
+        'soft_tissue_sarcoma': ['soft tissue sarcoma', 'sarcoma', '软组织肉瘤', '肉瘤'],
+        'squamous_cell_skin_cancer': ['squamous cell skin cancer', 'squamous cell', '鳞状细胞皮肤癌', '鳞癌'],
+        'systemic_light_chain_amyloidosis': ['systemic light chain amyloidosis', 'amyloidosis', '系统性轻链淀粉样变性', '淀粉样变'],
+        'systemic_mastocytosis': ['systemic mastocytosis', 'mastocytosis', '系统性肥大细胞增多症'],
+        't_cell_lymphomas': ['t-cell lymphomas', 't-cell lymphoma', 't细胞淋巴瘤'],
+        'testicular_cancer': ['testicular cancer', 'testicular', '睾丸癌', '睾丸'],
+        'thymomas_thymic': ['thymomas and thymic carcinomas', 'thymoma', 'thymic', '胸腺瘤', '胸腺癌', '胸腺'],
+        'thyroid_carcinoma': ['thyroid carcinoma', 'thyroid', '甲状腺癌', '甲状腺'],
+        'uterine_neoplasms': ['uterine neoplasms', 'uterine', 'endometrial', '子宫肿瘤', '子宫内膜癌', '子宫'],
+        'vaginal_cancer': ['vaginal cancer', 'vaginal', '阴道癌', '阴道'],
+        'vulvar_cancer': ['vulvar cancer', 'vulvar', '外阴癌', '外阴'],
+        'waldenstrom_macroglobulinemia': ['waldenström macroglobulinemia', 'lymphoplasmacytic lymphoma', 'wm', '华氏巨球蛋白血症', '淋巴浆细胞淋巴瘤'],
+        'wilms_tumor': ['wilms tumor', 'nephroblastoma', 'wilms', '肾母细胞瘤'],
+    }
+
+    # 反向映射：别名 → 癌种主键，用于将中文/别名关键词扩展为全部别名
+    # 例如: "胰腺" → "pancreatic" → ["pancreatic", "胰腺"]
+    _CANCER_ALIAS_REVERSE_MAP = {}
+    for _key, _aliases in CANCER_TYPE_FILTERS.items():
+        for _alias in _aliases:
+            if _alias not in _CANCER_ALIAS_REVERSE_MAP:
+                _CANCER_ALIAS_REVERSE_MAP[_alias.lower()] = _key
+    del _key, _aliases, _alias
+
     def __init__(self, config: Dict[str, Any]):
         """初始化下载器
 
@@ -167,18 +279,23 @@ class NCCNDownloaderV2:
         """
         self.config = config
         self.session = requests.Session()
-        self.setup_session()
         self.base_download_dir = Path('nccn_downloads')
         self.logs_dir = self.base_download_dir / 'logs'
         self.setup_directories()
         self.setup_logging()
         self.stats = DownloadStats()
 
-        # 下载设置
-        self.max_retries = 3
-        self.retry_delay = 5
-        self.request_delay = (2, 5)  # 随机延迟范围
-        self.min_file_size = 100 * 1024  # 最小文件大小 100KB
+        # 下载设置：优先读取 config['download_settings']，未配置时回退到默认值
+        download_settings = self.config.get('download_settings', {}) or {}
+        self.max_retries = download_settings.get('max_retries', 3)
+        self.retry_delay = download_settings.get('retry_delay', 5)
+        self.request_delay = download_settings.get('request_delay', (2, 5))
+        self.min_file_size = download_settings.get('min_file_size', 100 * 1024)
+
+        # 所有 requests 调用的超时设置
+        self.timeout = download_settings.get('timeout', 30)
+
+        self.setup_session()
 
     def setup_session(self):
         """设置会话"""
@@ -206,6 +323,103 @@ class NCCNDownloaderV2:
                 cookies[key] = value
         return cookies
 
+    @staticmethod
+    def normalize_language_filter(language_filter: Any) -> str:
+        """将交互/CLI 的数字语言选项转换为旧逻辑可识别的 all/english/chinese/other。"""
+        if language_filter is None:
+            return 'all'
+        key = str(language_filter).strip().lower()
+        if not key:
+            return 'all'
+        group = NCCNDownloaderV2.LANGUAGE_GROUPS.get(key, key)
+        if group == 'chinese':
+            return 'chinese'
+        if group == 'english':
+            return 'english'
+        if group == 'other':
+            return 'other'
+        return 'all'
+
+    @staticmethod
+    def language_group_label(language_filter: Any) -> str:
+        """获取语言筛选的中文展示名称。"""
+        group = NCCNDownloaderV2.normalize_language_filter(language_filter)
+        return NCCNDownloaderV2.LANGUAGE_GROUP_LABELS.get(group, language_filter)
+
+    @staticmethod
+    def _language_allowed(detected_language: str, language_filter: Any) -> bool:
+        """判断检测到的语言是否属于当前语言分组。"""
+        group = NCCNDownloaderV2.normalize_language_filter(language_filter)
+        if group == 'all':
+            return True
+        if group == 'chinese':
+            return detected_language == 'Chinese'
+        if group == 'english':
+            return detected_language == 'English'
+        if group == 'other':
+            return detected_language not in ['English', 'Chinese']
+        return True
+
+    @staticmethod
+    def _normalize_cancer_filter(cancer_filter: Any) -> List[str]:
+        """将癌种筛选输入转换为小写关键词列表。
+
+        如果输入的是别名（如中文"胰腺"），会自动扩展为对应癌种的全部别名
+        （如 ["pancreatic", "胰腺"]），确保能匹配英文标题。
+        """
+        if cancer_filter is None:
+            return []
+        if isinstance(cancer_filter, (list, tuple, set)):
+            values = cancer_filter
+        else:
+            values = re.split(r'[,，|;；\s]+', str(cancer_filter))
+        keywords = []
+        for value in values:
+            value = str(value).strip().lower()
+            if value and value not in ['0', 'all', '全部', '所有']:
+                # 反向查找：如果是别名，扩展为对应癌种的全部别名
+                cancer_key = NCCNDownloaderV2._CANCER_ALIAS_REVERSE_MAP.get(value)
+                if cancer_key and cancer_key in NCCNDownloaderV2.CANCER_TYPE_FILTERS:
+                    for alias in NCCNDownloaderV2.CANCER_TYPE_FILTERS[cancer_key]:
+                        if alias not in keywords:
+                            keywords.append(alias)
+                elif value not in keywords:
+                    keywords.append(value)
+        return keywords
+
+    def _matches_cancer_filter(self, pdf_info: Dict[str, Any], cancer_filter: Any) -> bool:
+        """判断 PDF 信息是否匹配癌种筛选。"""
+        keywords = self._normalize_cancer_filter(cancer_filter)
+        if not keywords:
+            return True
+
+        haystack_parts = [
+            pdf_info.get('title', ''),
+            pdf_info.get('url', ''),
+            pdf_info.get('source_page', ''),
+        ]
+        haystack = ' '.join(str(part).lower() for part in haystack_parts)
+
+        for keyword in keywords:
+            alias_values = self.CANCER_TYPE_FILTERS.get(keyword, [keyword])
+            if any(alias in haystack for alias in alias_values):
+                return True
+        return False
+
+    def _filter_pdf_links_by_language(self, pdf_links: List[Dict[str, Any]], language_filter: Any) -> List[Dict[str, Any]]:
+        """按语言分组过滤 PDF 链接。"""
+        return [
+            pdf_info for pdf_info in pdf_links
+            if self._language_allowed(pdf_info.get('version', 'English'), language_filter)
+        ]
+
+    def _filter_pdf_links_by_cancer(self, pdf_links: List[Dict[str, Any]], cancer_filter: Any) -> List[Dict[str, Any]]:
+        """按癌种关键词过滤 PDF 链接。"""
+        return [
+            pdf_info for pdf_info in pdf_links
+            if self._matches_cancer_filter(pdf_info, cancer_filter)
+        ]
+
     def setup_directories(self):
         """设置目录结构"""
         # 创建基础目录
@@ -224,16 +438,21 @@ class NCCNDownloaderV2:
         log_file = self.logs_dir / f'download_{log_date}.log'
 
         # 配置日志
-        logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-            handlers=[
-                logging.FileHandler(log_file, encoding='utf-8'),
-                logging.StreamHandler(sys.stdout)
-            ]
-        )
-
         self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(logging.INFO)
+        for handler in list(self.logger.handlers):
+            self.logger.removeHandler(handler)
+            handler.close()
+        self.logger.propagate = False
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+        file_handler = logging.FileHandler(log_file, encoding='utf-8')
+        file_handler.setFormatter(formatter)
+        stream_handler = logging.StreamHandler(sys.stdout)
+        stream_handler.setFormatter(formatter)
+
+        self.logger.addHandler(file_handler)
+        self.logger.addHandler(stream_handler)
         self.logger.info("=== NCCN下载工具 v2.0 启动 ===")
 
     def authenticate(self) -> bool:
@@ -271,7 +490,7 @@ class NCCNDownloaderV2:
             login_page_url = "https://www.nccn.org/login"
             self.logger.debug(f"访问登录页面: {login_page_url}")
 
-            response = self.session.get(login_page_url)
+            response = self.session.get(login_page_url, timeout=self.timeout)
             response.raise_for_status()
 
             # 解析页面获取token
@@ -292,7 +511,8 @@ class NCCNDownloaderV2:
             login_response = self.session.post(
                 login_page_url,
                 data=login_data,
-                allow_redirects=True
+                allow_redirects=True,
+                timeout=self.timeout
             )
             login_response.raise_for_status()
 
@@ -303,7 +523,7 @@ class NCCNDownloaderV2:
 
             # 5. 测试访问受限页面
             test_url = "https://www.nccn.org/guidelines/category_1"
-            test_response = self.session.get(test_url)
+            test_response = self.session.get(test_url, timeout=self.timeout)
 
             if test_response.status_code == 200 and 'login' not in test_response.url.lower():
                 self.logger.info("用户名密码认证成功")
@@ -358,7 +578,7 @@ class NCCNDownloaderV2:
             test_url = "https://www.nccn.org/guidelines/category_1"
             self.logger.debug(f"使用Cookie测试访问: {test_url}")
 
-            response = self.session.get(test_url)
+            response = self.session.get(test_url, timeout=self.timeout)
 
             if response.status_code == 200 and 'login' not in response.url.lower():
                 self.logger.info("Cookie认证成功")
@@ -375,10 +595,13 @@ class NCCNDownloaderV2:
         """确保已认证"""
         try:
             test_url = "https://www.nccn.org/guidelines/category_1"
-            response = self.session.get(test_url)
+            response = self.session.get(test_url, timeout=self.timeout)
 
-            if 'login' in response.url.lower():
-                self.logger.warning("检测到登录状态失效，尝试重新认证")
+            # 既检查重定向到登录页，也检查非 200 状态码
+            if 'login' in response.url.lower() or response.status_code != 200:
+                self.logger.warning(
+                    f"检测到登录状态失效（状态码 {response.status_code}），尝试重新认证"
+                )
                 return self.authenticate()
             return True
 
@@ -386,12 +609,14 @@ class NCCNDownloaderV2:
             self.logger.error(f"检查认证状态失败: {str(e)}")
             return self.authenticate()
 
-    def download_theme(self, theme_key: str, language_filter: str = 'all') -> bool:
+    def download_theme(self, theme_key: str, language_filter: str = 'all', cancer_filter: Any = None, pdf_selection: List[Dict[str, Any]] = None) -> bool:
         """下载指定主题的指南
 
         Args:
-            theme_key: 主题键 ('1'-'5')
-            language_filter: 语言过滤选项 ('all', 'english', 'chinese')
+            theme_key: 主题键 ('1'-'6')
+            language_filter: 语言过滤选项 ('all', 'english', 'chinese', 'other')
+            cancer_filter: 癌种筛选关键词，支持英文/中文/逗号分隔
+            pdf_selection: 用户选择的 PDF 子列表（可选，为 None 时下载全部）
 
         Returns:
             bool: 下载是否成功
@@ -414,10 +639,15 @@ class NCCNDownloaderV2:
 
         try:
             # 获取PDF链接
-            pdf_links = self._get_pdf_links(theme, language_filter)
+            pdf_links = self._get_pdf_links(theme, language_filter, cancer_filter)
             if not pdf_links:
                 self.logger.warning(f"未找到PDF链接: {theme.display_name}")
                 return False
+
+            # 如果传入了用户选择，只下载选中的文件
+            if pdf_selection is not None:
+                selected_urls = {p['url'] for p in pdf_selection}
+                pdf_links = [p for p in pdf_links if p['url'] in selected_urls]
 
             self.stats.total_files = len(pdf_links)
             self.logger.info(f"找到 {self.stats.total_files} 个PDF文件")
@@ -437,13 +667,18 @@ class NCCNDownloaderV2:
                 time.sleep(random.uniform(*self.request_delay))
 
                 # 下载文件
-                success = self._download_single_pdf(pdf_info, theme_dir)
+                result = self._download_single_pdf(pdf_info, theme_dir)
 
-                if success:
+                if result is True:
+                    # 真正新下载成功，计入 successful_files
                     successful_count += 1
                     self.stats.successful_files += 1
+                elif result == 'skipped':
+                    # 已存在跳过，计入 skipped_files（已在 _download_single_pdf 内累加），
+                    # 不再重复计入 successful_files，避免成功率虚高
+                    successful_count += 1
                 else:
-                    failed_files.append(pdf_info['title'])
+                    failed_files.append(pdf_info['url'])
                     self.stats.failed_files += 1
 
             self.stats.end_time = time.time()
@@ -454,7 +689,7 @@ class NCCNDownloaderV2:
 
             # 询问是否重新下载失败的文件
             if failed_files:
-                self._handle_failed_downloads(failed_files, theme_dir)
+                self._handle_failed_downloads(failed_files, theme_dir, language_filter)
 
             return successful_count > 0
 
@@ -462,23 +697,26 @@ class NCCNDownloaderV2:
             self.logger.error(f"下载主题失败: {str(e)}")
             return False
 
-    def _get_pdf_links(self, theme: ThemeConfig, language_filter: str = 'all') -> List[Dict[str, Any]]:
+    def _get_pdf_links(self, theme: ThemeConfig, language_filter: str = 'all', cancer_filter: Any = None) -> List[Dict[str, Any]]:
         """获取PDF链接列表
 
         Args:
             theme: 主题配置
-            language_filter: 语言过滤选项 ('all', 'english', 'chinese')
+            language_filter: 语言过滤选项 ('all', 'english', 'chinese', 'other')
+            cancer_filter: 癌种筛选关键词，支持英文/中文/逗号分隔
 
         Returns:
             List[Dict]: PDF信息列表，每个包含title, url, version等
         """
         try:
             self.logger.info(f"🔍 开始获取PDF链接: {theme.url}")
+            self.logger.info(f"🌐 语言过滤: {self.language_group_label(language_filter)}")
             self.logger.debug(f"请求主题: {theme.display_name}")
+            self.logger.debug(f"癌种筛选: {cancer_filter}")
 
             # 第一步：获取主页面
             self.logger.info(f"📡 发送HTTP请求...")
-            response = self.session.get(theme.url, timeout=30)
+            response = self.session.get(theme.url, timeout=self.timeout)
             response.raise_for_status()
 
             self.logger.info(f"✅ HTTP请求成功，状态码: {response.status_code}")
@@ -496,9 +734,9 @@ class NCCNDownloaderV2:
                 self.logger.info(f"🎯 使用解析策略: chinese_only (患者指南中文版本，直接访问翻译页面)")
                 pdf_links = self._parse_patient_guidelines_chinese(soup, theme)
             elif theme.category == 'patient_guidelines_english':
-                # 患者指南英文版本：双步骤解析，只提取英文PDF
-                self.logger.info(f"🎯 使用解析策略: english_only (患者指南英文版本，双步解析)")
-                pdf_links = self._parse_patient_guidelines_english(soup, theme, language_filter)
+                # 患者指南双语版本：双步骤解析，支持英文/中文/多语言
+                self.logger.info(f"🎯 使用解析策略: bilingual (患者指南双语/多语言版本，双步解析)")
+                pdf_links = self._parse_patient_guidelines_bilingual(soup, theme, language_filter)
             else:
                 # 标准页面：两步流程
                 self.logger.info(f"🔍 解析主页面，获取guidelines-detail链接...")
@@ -508,15 +746,18 @@ class NCCNDownloaderV2:
                     self.logger.warning(f"⚠️ 未找到任何子链接")
                     return []
 
-                self.logger.info(f"📊 找到 {len(sub_links)} 个指南子页面")
+                sub_links = self._filter_sub_links_by_cancer(sub_links, cancer_filter)
+                self.logger.info(f"📊 癌种筛选后剩余 {len(sub_links)} 个指南子页面")
 
                 # 遍历每个子链接，获取PDF链接
                 pdf_links = []
-                for i, sub_url in enumerate(sub_links, 1):
-                    self.logger.info(f"📄 [{i}/{len(sub_links)}] 正在处理: {sub_url}")
+                for i, sub_info in enumerate(sub_links, 1):
+                    sub_url = sub_info['url']
+                    sub_title = sub_info.get('title', f"指南_{i}")
+                    self.logger.info(f"📄 [{i}/{len(sub_links)}] 正在处理: {sub_title}")
 
                     # 获取子页面的PDF链接
-                    sub_pdf_links = self._get_pdfs_from_detail_page(sub_url, f"指南_{i}", language_filter, theme)
+                    sub_pdf_links = self._get_pdfs_from_detail_page(sub_url, sub_title, language_filter, theme)
                     pdf_links.extend(sub_pdf_links)
 
                     self.logger.info(f"📈 当前累计PDF数量: {len(pdf_links)}")
@@ -524,6 +765,9 @@ class NCCNDownloaderV2:
                     # 请求间隔
                     if i < len(sub_links):
                         time.sleep(random.uniform(*self.request_delay))
+
+            pdf_links = self._filter_pdf_links_by_language(pdf_links, language_filter)
+            pdf_links = self._filter_pdf_links_by_cancer(pdf_links, cancer_filter)
 
             self.logger.info(f"🎯 解析完成，总共找到 {len(pdf_links)} 个PDF文件")
             return pdf_links
@@ -570,17 +814,18 @@ class NCCNDownloaderV2:
             self.logger.error(f"获取患者指南子链接失败: {str(e)}")
             return []
 
-    def _get_sub_links(self, soup: BeautifulSoup, base_url: str) -> List[str]:
-        """获取所有guidelines-detail子链接
+    def _get_sub_links(self, soup: BeautifulSoup, base_url: str) -> List[Dict[str, str]]:
+        """获取所有guidelines-detail子链接及其标题
 
         Args:
             soup: BeautifulSoup对象
             base_url: 基础URL
 
         Returns:
-            List[str]: 子链接URL列表
+            List[Dict[str, str]]: 子链接信息列表，每项包含 'url' 和 'title'
         """
         sub_links = []
+        seen_urls = set()
 
         try:
             # 查找guideline-items区域
@@ -593,8 +838,11 @@ class NCCNDownloaderV2:
                         href = link['href']
                         if '/guidelines/guidelines-detail' in href:
                             full_url = urljoin(base_url, href)
-                            sub_links.append(full_url)
-                            self.logger.debug(f"找到指南链接: {full_url}")
+                            title = link.get_text(' ', strip=True)
+                            if full_url not in seen_urls:
+                                seen_urls.add(full_url)
+                                sub_links.append({'url': full_url, 'title': title})
+                                self.logger.debug(f"找到指南链接: {title} - {full_url}")
 
             if not sub_links:
                 # 备用策略：直接查找所有包含guidelines-detail的链接
@@ -604,14 +852,91 @@ class NCCNDownloaderV2:
                 for link in guidelines_links:
                     href = link['href']
                     full_url = urljoin(base_url, href)
-                    if full_url not in sub_links:
-                        sub_links.append(full_url)
+                    if full_url not in seen_urls:
+                        seen_urls.add(full_url)
+                        title = link.get_text(' ', strip=True)
+                        sub_links.append({'url': full_url, 'title': title})
 
             return sub_links
 
         except Exception as e:
             self.logger.error(f"获取子链接失败: {str(e)}")
             return []
+
+    def _filter_sub_links_by_cancer(self, sub_links: List[Dict[str, str]], cancer_filter: Any) -> List[Dict[str, str]]:
+        """在访问详情页前按癌种关键词过滤子链接，减少请求量。"""
+        keywords = self._normalize_cancer_filter(cancer_filter)
+        if not keywords:
+            return sub_links
+
+        filtered_links = []
+        for sub_info in sub_links:
+            title = sub_info.get('title', '')
+            url = sub_info.get('url', '')
+            pdf_info = {'title': title, 'url': url, 'source_page': url}
+            if self._matches_cancer_filter(pdf_info, cancer_filter):
+                filtered_links.append(sub_info)
+        return filtered_links
+
+    def _get_cancer_type_cache_path(self) -> Path:
+        """获取癌种列表缓存路径。"""
+        cache_dir = self.base_download_dir / '.cache'
+        cache_dir.mkdir(exist_ok=True)
+        return cache_dir / 'cancer_types.json'
+
+    def _load_cached_cancer_types(self, max_age_days: int = 7) -> List[str]:
+        """读取未过期的癌种缓存。"""
+        cache_path = self._get_cancer_type_cache_path()
+        if not cache_path.exists():
+            return []
+        try:
+            with open(cache_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            updated_at = float(data.get('updated_at', 0))
+            age_days = (time.time() - updated_at) / 86400
+            if age_days <= max_age_days:
+                return data.get('items', [])
+        except Exception as e:
+            self.logger.debug(f"读取癌种缓存失败: {e}")
+        return []
+
+    def _save_cached_cancer_types(self, items: List[str]):
+        """保存癌种缓存。"""
+        cache_path = self._get_cancer_type_cache_path()
+        try:
+            with open(cache_path, 'w', encoding='utf-8') as f:
+                json.dump({
+                    'updated_at': time.time(),
+                    'items': items
+                }, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            self.logger.debug(f"保存癌种缓存失败: {e}")
+
+    def _discover_cancer_types_from_page(self, theme: ThemeConfig = None, refresh: bool = False) -> List[str]:
+        """从 NCCN 分类页发现癌种列表。"""
+        theme = theme or self.THEMES['1']
+        cached_items = [] if refresh else self._load_cached_cancer_types()
+        if cached_items:
+            return cached_items
+
+        try:
+            self.logger.info(f"🔍 从NCCN分类页发现癌种列表: {theme.url}")
+            response = self.session.get(theme.url, timeout=self.timeout)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.content, 'html.parser')
+            sub_links = self._get_sub_links(soup, theme.url)
+            items = []
+            for sub_info in sub_links:
+                title = sub_info.get('title', '').strip()
+                if title and title not in items:
+                    items.append(title)
+            if items:
+                self._save_cached_cancer_types(items)
+                return items
+        except Exception as e:
+            self.logger.warning(f"动态获取癌种列表失败，使用内置列表: {e}")
+
+        return list(self.CANCER_TYPE_FILTERS.keys())
 
     def _parse_category_1(self, soup: BeautifulSoup) -> List[Dict[str, Any]]:
         """解析癌症治疗指南页面"""
@@ -719,9 +1044,8 @@ class NCCNDownloaderV2:
         for link in links:
             href = link.get('href', '')
             if href.endswith('.pdf'):
-                # 对于Chinese Translations部分，忽略语言过滤（因为这里本身就是中文）
-                if language_filter == 'english':
-                    # 如果只要求英文，跳过中文翻译
+                # 对于Chinese Translations部分，非中文筛选直接跳过
+                if language_filter in ['english', 'other']:
                     continue
 
                 pdf_count += 1
@@ -756,122 +1080,6 @@ class NCCNDownloaderV2:
 
         self.logger.info(f"✅ Chinese Translations解析完成，共找到 {pdf_count} 个中文PDF链接")
         return pdf_links
-
-    def _extract_guidelines_only(self, soup: BeautifulSoup, language_filter: str = 'all') -> List[Dict[str, Any]]:
-        """专门提取"Guidelines"部分的核心指南PDF，忽略其他附加文件"""
-        pdf_links = []
-
-        self.logger.info(f"🎯 专门提取Guidelines部分的核心指南...")
-
-        try:
-            # 查找所有h4标签，寻找"Guidelines"
-            headers = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
-            guidelines_section = None
-
-            for header in headers:
-                header_text = header.get_text(strip=True)
-                if 'Guidelines' in header_text and ('GL' in header.get('class', []) or 'guidelines' in header_text.lower()):
-                    guidelines_section = header
-                    self.logger.info(f"✅ 找到Guidelines部分: {header_text}")
-                    break
-
-            if not guidelines_section:
-                self.logger.warning(f"⚠️ 未找到Guidelines部分")
-                return []
-
-            # 找到Guidelines部分后的pdfList
-            current = guidelines_section
-            pdf_list_found = False
-
-            # 遍历Guidelines后面的元素，找到第一个pdfList
-            while current and not pdf_list_found:
-                current = current.find_next_sibling()
-
-                if current is None:
-                    break
-
-                # 如果遇到下一个标题，停止
-                if current.name in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
-                    self.logger.info(f"🛑 遇到下一个标题: {current.get_text(strip=True)[:50]}...")
-                    break
-
-                # 查找pdfList
-                if current.name == 'ul' and 'pdfList' in current.get('class', []):
-                    pdf_list_found = True
-                    self.logger.info(f"📋 找到Guidelines下的pdfList，包含 {len(current.find_all('a', href=True))} 个链接")
-
-                    # 提取pdfList中的PDF链接
-                    for link in current.find_all('a', href=True):
-                        href = link.get('href', '')
-                        if href.endswith('.pdf'):
-                            # 应用语言过滤
-                            link_text = link.text.strip()
-                            if not self._should_include_pdf(href, language_filter, link_text):
-                                self.logger.debug(f"🔍 跳过非英文PDF: {link_text}")
-                                continue
-
-                            # 提取版本信息
-                            version_info = self._extract_version_info(link)
-
-                            # 正确拼接URL
-                            if href.startswith('http'):
-                                pdf_url = href
-                            else:
-                                base_url = 'https://www.nccn.org'
-                                if href.startswith('/'):
-                                    pdf_url = base_url + href
-                                else:
-                                    pdf_url = urljoin(base_url, href)
-
-                            # 生成增强的标题和版本信息
-                            enhanced_info = self._enhance_pdf_info(link_text, version_info, pdf_url)
-
-                            pdf_links.append({
-                                'title': enhanced_info['title'],
-                                'url': pdf_url,
-                                'version': enhanced_info['version'],
-                                'filename': enhanced_info['filename'],  # 带版本的文件名
-                                'is_guideline': True  # 标记为核心指南
-                            })
-
-                            self.logger.info(f"📄 核心指南: {enhanced_info['title']}")
-                            self.logger.info(f"   📁 文件名: {enhanced_info['filename']}")
-                            if version_info:
-                                self.logger.info(f"   🏷️  版本: {version_info}")
-
-                    break
-
-            if not pdf_list_found:
-                self.logger.warning(f"⚠️ Guidelines部分下未找到pdfList")
-                return []
-
-            self.logger.info(f"✅ Guidelines提取完成，找到 {len(pdf_links)} 个核心指南")
-            return pdf_links
-
-        except Exception as e:
-            self.logger.error(f"❌ Guidelines提取失败: {str(e)}")
-            return []
-
-    def _extract_version_info(self, link_element) -> str:
-        """从链接元素中提取版本信息"""
-        try:
-            # 查找同一段落中的版本信息
-            parent_p = link_element.find_parent('p')
-            if parent_p:
-                # 查找span标签中的版本信息
-                version_spans = parent_p.find_all('span')
-                for span in version_spans:
-                    span_text = span.get_text(strip=True)
-                    if 'version' in span_text.lower() or 'Version' in span_text:
-                        # 提取版本号，如"Version 1.2026" -> "1_2026"
-                        version_clean = span_text.replace('Version', '').replace('version', '').strip()
-                        version_clean = version_clean.replace('.', '_').replace(' ', '_')
-                        return version_clean
-
-            return ""
-        except:
-            return ""
-
 
     def _parse_patient_guidelines_bilingual(self, soup: BeautifulSoup, theme: ThemeConfig, language_filter: str = 'all') -> List[Dict[str, Any]]:
         """解析双语患者指南页面 - 优化解析流程"""
@@ -947,7 +1155,7 @@ class NCCNDownloaderV2:
                 try:
                     self.logger.info(f"📄 [{i+1}/{max_pages}] 处理详情页: {detail['text']}")
 
-                    response = self.session.get(detail['url'])
+                    response = self.session.get(detail['url'], timeout=self.timeout)
                     if response.status_code != 200:
                         self.logger.warning(f"无法访问详情页: {detail['url']}")
                         continue
@@ -1001,7 +1209,7 @@ class NCCNDownloaderV2:
                         self.logger.info(f"🌐 [{i+1}/{len(translation_links)}] 访问翻译页面: {translation['text']}")
                         self.logger.info(f"🔗 URL: {translation['url']}")
 
-                        response = self.session.get(translation['url'])
+                        response = self.session.get(translation['url'], timeout=self.timeout)
                         if response.status_code != 200:
                             self.logger.warning(f"无法访问翻译页面: {translation['url']}")
                             continue
@@ -1271,7 +1479,7 @@ class NCCNDownloaderV2:
             translation_url = "https://www.nccn.org/global/what-we-do/guidelines-for-patients-translations"
             self.logger.info(f"🌐 直接访问翻译页面: {translation_url}")
 
-            response = self.session.get(translation_url)
+            response = self.session.get(translation_url, timeout=self.timeout)
             if response.status_code != 200:
                 self.logger.warning(f"无法访问翻译页面: {translation_url}")
                 return []
@@ -1389,7 +1597,7 @@ class NCCNDownloaderV2:
                 self.logger.info(f"📄 [{i}/{len(sub_links)}] 处理详情页: {sub_url.split('?')[0].split('/')[-1]}")
 
                 try:
-                    response = self.session.get(sub_url)
+                    response = self.session.get(sub_url, timeout=self.timeout)
                     if response.status_code != 200:
                         self.logger.warning(f"无法访问详情页: {sub_url}")
                         continue
@@ -1447,10 +1655,44 @@ class NCCNDownloaderV2:
             self.logger.error(f"详细错误: {traceback.format_exc()}")
             return []
 
+    @staticmethod
+    def _is_url_allowed(url: str) -> bool:
+        """校验 URL 域名是否在白名单内。"""
+        try:
+            netloc = urlparse(url).netloc.lower()
+            hostname = netloc.split(':')[0]
+            return any(hostname == d or hostname.endswith('.' + d)
+                       for d in NCCNDownloaderV2.ALLOWED_DOWNLOAD_DOMAINS)
+        except Exception:
+            return False
+
+    @staticmethod
+    def _contains_cjk(text: str) -> bool:
+        """判断字符串中是否含有 CJK（中日韩）统一表意文字。
+
+        覆盖常用中日韩汉字区间，用于识别以中文标题命名的翻译版 PDF。
+        """
+        if not text:
+            return False
+        for ch in text:
+            code = ord(ch)
+            # CJK 统一表意文字（基本区 + 扩展A）+ 日文假名 + 韩文谚文
+            if (0x4E00 <= code <= 0x9FFF      # CJK 基本区
+                    or 0x3400 <= code <= 0x4DBF  # CJK 扩展 A
+                    or 0x3040 <= code <= 0x30FF  # 平假名 + 片假名
+                    or 0xAC00 <= code <= 0xD7AF  # 韩文谚文音节
+                    or 0xFF00 <= code <= 0xFFEF):  # 全角字符
+                return True
+        return False
+
     def _detect_pdf_language(self, pdf_url: str, link_text: str = "") -> str:
         """检测PDF的语言版本"""
         url_lower = pdf_url.lower()
         text_lower = link_text.lower()
+
+        # 优先检查 CJK 字符：链接文本或 URL 中含中文/日文/韩文字符
+        if self._contains_cjk(link_text) or self._contains_cjk(pdf_url):
+            return 'Chinese'
 
         # 检查URL中是否包含中文标识（使用更精确的匹配，避免误判）
         if any(indicator in url_lower for indicator in ['-zh', '-chinese']):
@@ -1526,13 +1768,10 @@ class NCCNDownloaderV2:
                 return False
 
         # 语言过滤逻辑
-        if language_filter == 'all':
-            # 在全部模式下，只保留英文和中文版本
-            detected_language = self._detect_pdf_language(pdf_url, link_text)
-            return detected_language in ['English', 'Chinese']
-
-        # 检测PDF的实际语言
         detected_language = self._detect_pdf_language(pdf_url, link_text)
+
+        if language_filter == 'all':
+            return True
 
         if language_filter == 'chinese':
             return detected_language == 'Chinese'
@@ -1561,6 +1800,8 @@ class NCCNDownloaderV2:
                     return False
             else:
                 return False
+        elif language_filter == 'other':
+            return detected_language not in ['English', 'Chinese']
         else:
             return True
 
@@ -1578,7 +1819,7 @@ class NCCNDownloaderV2:
         """
         try:
             self.logger.info(f"🔍 请求详情页面: {detail_url}")
-            response = self.session.get(detail_url, timeout=30)
+            response = self.session.get(detail_url, timeout=self.timeout)
             response.raise_for_status()
 
             self.logger.info(f"✅ 详情页面请求成功，状态码: {response.status_code}")
@@ -2074,11 +2315,17 @@ class NCCNDownloaderV2:
 
         filepath = theme_dir / filename
 
+        # 校验下载 URL 域名白名单，防止从 NCCN 页面抓取到的恶意链接
+        if not self._is_url_allowed(pdf_url):
+            self.logger.error(f"下载 URL 域名不在白名单中，跳过: {pdf_url}")
+            return False
+
         # 检查文件是否已存在且有效
         if self._is_file_valid(filepath):
             self.logger.info(f"文件已存在且有效，跳过: {filename}")
             self.stats.skipped_files += 1
-            return True
+            # 返回哨兵值 'skipped'，区别于真正新下载成功的 True
+            return 'skipped'
 
         # 重试机制
         for attempt in range(self.max_retries):
@@ -2102,7 +2349,7 @@ class NCCNDownloaderV2:
                     pdf_url,
                     headers=download_headers,
                     stream=True,
-                    timeout=30
+                    timeout=self.timeout
                 )
                 response.raise_for_status()
 
@@ -2176,7 +2423,8 @@ class NCCNDownloaderV2:
             with open(filepath, 'rb') as f:
                 header = f.read(4)
                 return header == b'%PDF'
-        except:
+        except OSError:
+            # 文件读取失败视为无效；不吞 KeyboardInterrupt/SystemExit
             return False
 
     def _check_pdf_validity(self, pdf_url: str) -> bool:
@@ -2189,7 +2437,7 @@ class NCCNDownloaderV2:
             bool: PDF是否有效
         """
         try:
-            response = self.session.head(pdf_url, timeout=10)
+            response = self.session.head(pdf_url, timeout=self.timeout)
             response.raise_for_status()
 
             content_length = response.headers.get('content-length', 0)
@@ -2199,8 +2447,11 @@ class NCCNDownloaderV2:
 
             return True
 
-        except:
-            return True  # HEAD请求失败时，假设文件有效，继续尝试下载
+        except requests.exceptions.RequestException as e:
+            # HEAD 请求失败（网络/SSL/超时等）时，假设文件有效，继续尝试真正下载
+            # 只捕获 requests 异常，不吞 KeyboardInterrupt/SystemExit 和程序 bug
+            self.logger.debug(f"HEAD 校验失败，将尝试直接下载: {e}")
+            return True
 
     def _validate_pdf_content(self, filepath: Path) -> bool:
         """验证PDF文件内容
@@ -2224,7 +2475,8 @@ class NCCNDownloaderV2:
                     return False
 
                 return True
-        except:
+        except OSError:
+            # 文件读取失败视为校验未通过；不吞 KeyboardInterrupt/SystemExit
             return False
 
     def _generate_download_report(self, theme: ThemeConfig):
@@ -2259,51 +2511,54 @@ class NCCNDownloaderV2:
         self.logger.info(f"下载数据量: {self.stats.downloaded_size_mb:.1f}MB")
         self.logger.info(f"报告已保存: {report_file}")
 
-    def _handle_failed_downloads(self, failed_files: List[str], theme_dir: Path):
+    def _handle_failed_downloads(self, failed_files: List[str], theme_dir: Path, language_filter: str = 'all'):
         """处理失败下载的文件
 
         Args:
-            failed_files: 失败文件列表
+            failed_files: 失败文件 URL 列表
             theme_dir: 主题目录
+            language_filter: 语言过滤选项
         """
         if not failed_files:
             return
 
         print(f"\n有 {len(failed_files)} 个文件下载失败:")
-        for i, filename in enumerate(failed_files, 1):
-            print(f"  {i}. {filename}")
+        for i, url in enumerate(failed_files, 1):
+            short = url.split('/')[-1] if '/' in url else url
+            print(f"  {i}. {short}")
 
         # 询问是否重新下载
         print(f"\n是否重新尝试下载失败的文件? (y/n): ", end='')
         try:
             choice = input().lower().strip()
             if choice in ['y', 'yes', '是']:
-                self._retry_failed_downloads(failed_files, theme_dir)
+                self._retry_failed_downloads(failed_files, theme_dir, language_filter)
         except KeyboardInterrupt:
             print("\n用户取消操作")
 
-    def _retry_failed_downloads(self, failed_files: List[str], theme_dir: Path):
+    def _retry_failed_downloads(self, failed_files: List[str], theme_dir: Path, language_filter: str = 'all'):
         """重新下载失败的文件
 
         Args:
             failed_files: 失败文件列表
             theme_dir: 主题目录
+            language_filter: 语言过滤选项
         """
         self.logger.info(f"开始重新下载 {len(failed_files)} 个失败文件...")
 
         # 重新获取PDF链接并匹配失败的文件
         for theme in self.THEMES.values():
             if theme.directory == theme_dir.name:
-                pdf_links = self._get_pdf_links(theme)
+                pdf_links = self._get_pdf_links(theme, language_filter)
 
                 for failed_file in failed_files:
                     # 查找匹配的PDF链接
                     for pdf_info in pdf_links:
-                        if failed_file in pdf_info['title']:
+                        if failed_file in pdf_info['title'] or failed_file in pdf_info['url']:
                             self.logger.info(f"重新下载: {failed_file}")
-                            success = self._download_single_pdf(pdf_info, theme_dir)
+                            result = self._download_single_pdf(pdf_info, theme_dir)
 
-                            if success:
+                            if result is True or result == 'skipped':
                                 self.logger.info(f"重新下载成功: {failed_file}")
                             else:
                                 self.logger.error(f"重新下载失败: {failed_file}")
@@ -2312,20 +2567,17 @@ class NCCNDownloaderV2:
                 break
 
 
-def main():
-    """主函数"""
-    print("=" * 60)
-    print("    NCCN指南下载工具 v2.0")
-    print("    优化的菜单式下载工具")
-    print("    作者: Claude Code")
-    print("=" * 60)
 
-    # 读取配置文件
-    config_file = 'config.json'
+def _load_main_config(config_path: Optional[str] = None) -> Optional[Dict[str, Any]]:
+    """读取 config.json，并允许环境变量覆盖认证配置。"""
+    config_file = Path(config_path or 'config.json')
+    if not config_file.is_absolute():
+        config_file = Path(__file__).resolve().parent / config_file
+
     if not os.path.exists(config_file):
         print(f"❌ 配置文件 {config_file} 不存在")
         print("请创建config.json配置文件")
-        return
+        return None
 
     try:
         with open(config_file, 'r', encoding='utf-8') as f:
@@ -2333,201 +2585,330 @@ def main():
         print(f"✅ 成功读取配置文件 {config_file}")
     except Exception as e:
         print(f"❌ 读取配置文件失败: {e}")
-        return
+        return None
+
+    auth_config = config_data.get('authentication', {}) or {}
+    method = os.getenv('NCCN_AUTH_METHOD') or auth_config.get('method', 'username_password')
+    username = os.getenv('NCCN_USERNAME') or auth_config.get('username', '')
+    password = os.getenv('NCCN_PASSWORD') or auth_config.get('password', '')
+    cookie_file = os.getenv('NCCN_COOKIE_FILE') or auth_config.get('cookie_file', 'extracted_cookies.txt')
+    cookie_file_path = Path(cookie_file).expanduser()
+    if not cookie_file_path.is_absolute():
+        cookie_file_path = config_file.resolve().parent / cookie_file_path
 
     config = {}
-
-    try:
-        # 从配置获取认证方式
-        auth_config = config_data.get('authentication', {})
-        method = auth_config.get('method', 'username_password')
-        username = auth_config.get('username', '')
-        password = auth_config.get('password', '')
-        cookie_file = auth_config.get('cookie_file', 'extracted_cookies.txt')
-
-        print(f"\n📋 使用认证方式: {method}")
-
-        if method == 'username_password':
-            if not username or not password or password == 'your_password_here':
-                print("❌ 用户名/密码认证配置不完整")
-                print(f"   请在config.json中设置正确的用户名和密码")
-                print(f"   当前用户名: {username if username else '未设置'}")
-                print(f"   当前密码: {'已设置' if password and password != 'your_password_here' else '未设置或使用默认值'}")
-                return
-
-            config['auth_method'] = 'username_password'
-            config['username'] = username
-            config['password'] = password
-            print(f"✅ 使用用户名认证: {username}")
-
-        elif method == 'cookie':
-            if not os.path.exists(cookie_file):
-                print(f"❌ Cookie文件 {cookie_file} 不存在")
-                print(f"请确保extracted_cookies.txt文件存在")
-                return
-
+    if method == 'username_password':
+        if not username or not password or password == 'your_password_here':
+            print("❌ 用户名/密码认证配置不完整")
+            print("   请在config.json或环境变量 NCCN_USERNAME/NCCN_PASSWORD 中设置")
+            return None
+        config['auth_method'] = 'username_password'
+        config['username'] = username
+        config['password'] = password
+        print(f"✅ 使用用户名认证: {username}")
+    elif method == 'cookie':
+        env_cookie = os.getenv('NCCN_COOKIE')
+        if env_cookie:
+            config['auth_method'] = 'cookie'
+            config['cookie'] = env_cookie
+            print("✅ 使用 NCCN_COOKIE 环境变量认证")
+        else:
+            if not os.path.exists(cookie_file_path):
+                print(f"❌ Cookie文件 {cookie_file_path} 不存在")
+                print("请确保extracted_cookies.txt文件存在，或设置 NCCN_COOKIE_FILE/NCCN_COOKIE")
+                return None
             try:
-                with open(cookie_file, 'r', encoding='utf-8') as f:
+                with open(cookie_file_path, 'r', encoding='utf-8') as f:
                     cookie_content = f.read().strip()
                 if not cookie_content:
                     print(f"❌ Cookie文件 {cookie_file} 为空")
-                    return
-
+                    return None
                 config['auth_method'] = 'cookie'
-                config['cookie_file'] = cookie_file
-                print(f"✅ 使用Cookie认证: {cookie_file}")
+                config['cookie_file'] = str(cookie_file_path)
+                print(f"✅ 使用Cookie认证: {cookie_file_path}")
             except Exception as e:
                 print(f"❌ 读取Cookie文件失败: {e}")
-                return
-        else:
-            print(f"❌ 不支持的认证方式: {method}")
-            return
+                return None
+    else:
+        print(f"❌ 不支持的认证方式: {method}")
+        return None
 
-        # 初始化下载器
-        downloader = NCCNDownloaderV2(config)
+    return config
 
-        # 测试认证
-        print("\n正在测试认证...")
-        if not downloader.authenticate():
-            print("认证失败，请检查认证信息")
-            return
 
-        print("认证成功!\n")
+def _prompt_language_filter(default: str = '1') -> str:
+    """询问简化语言菜单。"""
+    print("\n📋 语言筛选:")
+    print("0. 中文")
+    print("1. 英文（默认）")
+    print("2. 日语/其他语言")
+    print("3. 全部")
+    while True:
+        choice = input(f"请选择语言 (0-3, 默认{default}): ").strip() or default
+        if choice in NCCNDownloaderV2.LANGUAGE_GROUPS:
+            return NCCNDownloaderV2.normalize_language_filter(choice)
+        print("无效选择，请输入 0-3")
 
-        # 主菜单循环
-        while True:
-            print("\n" + "=" * 60)
-            print("主菜单 - 请选择要下载的主题:")
-            print("=" * 60)
 
-            for key, theme in NCCNDownloaderV2.THEMES.items():
-                print(f"{key}. {theme.display_name}")
-                print(f"   {theme.description}")
-                print(f"   目录: {theme.directory}")
-                print()
+def _prompt_cancer_filter(downloader: NCCNDownloaderV2) -> Optional[str]:
+    """询问癌种筛选。"""
+    print("\n📋 癌种类型筛选:")
+    print("0. 全部癌种（默认）")
+    print("L. 查看/刷新NCCN癌种列表")
+    print("K. 手工输入关键词，例如 breast / 乳腺 / lung,colorectal")
 
-            print("7. 查看下载统计")
-            print("8. 退出")
+    while True:
+        choice = input("请选择癌种 (0/L/K, 默认0): ").strip()
+        if not choice:
+            return None
+        key = choice.lower()
+        if key == '0':
+            return None
+        if key == 'l':
+            refresh = input("是否强制刷新NCCN癌种列表? (y/N): ").strip().lower() in ['y', 'yes', '是']
+            items = downloader._discover_cancer_types_from_page(refresh=refresh)
+            print(f"\n找到 {len(items)} 个癌种:")
+            for i, item in enumerate(items, 1):
+                print(f"  {i}. {item}")
+            print("  0. 全部癌种")
+            print("  K. 手工输入关键词")
+            continue
+        if key == 'k':
+            return input("请输入癌种关键词（逗号分隔）: ").strip()
+        return choice
 
+
+def _select_pdf_list(pdf_links: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """展示解析到的 PDF 清单，让用户选择下载哪些文件。
+
+    Returns:
+        用户选择的 PDF 子列表，或全部（选择"全部"或取消时）。
+    """
+    if not pdf_links:
+        return []
+
+    print("\n📋 解析到的 PDF 清单:")
+    print("=" * 60)
+    for i, pdf in enumerate(pdf_links, 1):
+        title = pdf.get('title', 'Unknown')
+        version = pdf.get('version', 'Unknown')
+        url_short = pdf.get('url', '')
+        if len(url_short) > 60:
+            url_short = url_short[:60] + '...'
+        print(f"  {i}. [{version}] {title}")
+        print(f"     {url_short}")
+    print("=" * 60)
+    print(f"  A. 全部下载 ({len(pdf_links)} 个文件)")
+    print(f"  输入编号选择，逗号分隔多个，如: 1,3,5-8")
+    print(f"  直接回车 = 全部下载")
+
+    choice = input("\n请选择 (A/编号/回车=全部): ").strip()
+    if not choice or choice.lower() == 'a':
+        return pdf_links
+
+    # Parse number selections: supports "1,3,5-8" format
+    selected = set()
+    parts = re.split(r'[,，\s]+', choice)
+    for part in parts:
+        part = part.strip()
+        if '-' in part:
             try:
-                choice = input("\n请输入选择 (1-8): ").strip()
+                start, end = part.split('-', 1)
+                for n in range(int(start.strip()), int(end.strip()) + 1):
+                    if 1 <= n <= len(pdf_links):
+                        selected.add(n - 1)
+            except ValueError:
+                pass
+        else:
+            try:
+                n = int(part)
+                if 1 <= n <= len(pdf_links):
+                    selected.add(n - 1)
+            except ValueError:
+                pass
 
-                if choice == '8':
-                    print("感谢使用NCCN下载工具!")
-                    break
-                elif choice == '7':
-                    # 显示统计信息（如果有的话）
-                    print("\n请先运行下载以获取统计信息")
-                    input("按回车键继续...")
-                elif choice in NCCNDownloaderV2.THEMES:
-                    # 下载指定主题
-                    theme = NCCNDownloaderV2.THEMES[choice]
+    if not selected:
+        print("未选择任何文件，默认下载全部。")
+        return pdf_links
 
-                    # 语言过滤选项
-                    language_filter = 'all'  # 默认全部
-                    if theme.has_language_filter:
-                        if theme.category == 'category_1':
-                            # 癌症治疗指南：默认只下载英文版本
-                            language_filter = 'english'
-                            print(f"\n📋 癌症治疗指南将只下载英文版本")
-                        elif theme.category == 'supportive_care':
-                            print(f"\n📋 语言过滤选项 (适用于支持性护理指南):")
-                            print("1. 全部版本 (英文 + 中文)")
-                            print("2. 仅英文版本")
+    result = [pdf_links[i] for i in sorted(selected)]
+    print(f"\n已选择 {len(result)} 个文件进行下载。")
+    return result
 
-                            while True:
-                                lang_choice = input("\n请选择语言过滤 (1-2, 默认1): ").strip()
-                                if not lang_choice:
-                                    lang_choice = '1'
 
-                                if lang_choice == '1':
-                                    language_filter = 'all'
-                                    break
-                                elif lang_choice == '2':
-                                    language_filter = 'english'
-                                    break
-                                else:
-                                    print("无效选择，请输入 1 或 2")
-                        elif theme.category == 'patient_guidelines_bilingual':
-                            print(f"\n📋 语言过滤选项 (适用于双语患者指南):")
-                            print("1. 全部版本 (英文 + 中文)")
-                            print("2. 仅英文版本")
-                            print("3. 仅中文版本")
+def _confirm_download(theme_name: str, language_filter: str, cancer_filter: Optional[str]) -> bool:
+    """下载前确认。"""
+    print("\n=== 下载确认 ===")
+    print(f"主题: {theme_name}")
+    print(f"语言: {NCCNDownloaderV2.language_group_label(language_filter)}")
+    print(f"癌种: {cancer_filter or '全部'}")
+    choice = input("确认后输入 Y 开始下载，其他键取消: ").strip().lower()
+    return choice in ['y', 'yes', '是']
 
-                            while True:
-                                lang_choice = input("\n请选择语言过滤 (1-3, 默认1): ").strip()
-                                if not lang_choice:
-                                    lang_choice = '1'
 
-                                if lang_choice == '1':
-                                    language_filter = 'all'
-                                    break
-                                elif lang_choice == '2':
-                                    language_filter = 'english'
-                                    break
-                                elif lang_choice == '3':
-                                    language_filter = 'chinese'
-                                    break
-                                else:
-                                    print("无效选择，请输入 1-3 之间的数字")
-                        else:
-                            # 其他需要语言过滤的情况
-                            print(f"\n📋 语言过滤选项:")
-                            print("1. 全部版本 (英文 + 中文)")
-                            print("2. 仅英文版本")
-                            print("3. 仅中文版本")
+def _show_download_stats(downloader: NCCNDownloaderV2):
+    """显示最近统计报告。"""
+    report_files = sorted(downloader.logs_dir.glob('stats_*.json'), key=lambda p: p.stat().st_mtime, reverse=True)
+    if not report_files:
+        print("\n暂无下载统计，请先运行下载。")
+        return
 
-                            while True:
-                                lang_choice = input("\n请选择语言过滤 (1-3, 默认1): ").strip()
-                                if not lang_choice:
-                                    lang_choice = '1'
+    print("\n最近5次下载统计:")
+    for i, report_file in enumerate(report_files[:5], 1):
+        try:
+            with open(report_file, 'r', encoding='utf-8') as f:
+                report = json.load(f)
+            stats = report.get('stats', {})
+            print(f"{i}. {report_file.name}")
+            print(f"   主题: {report.get('theme', 'N/A')}")
+            print(f"   总数: {stats.get('total_files', 0)} | 成功: {stats.get('successful_files', 0)} | 跳过: {stats.get('skipped_files', 0)} | 失败: {stats.get('failed_files', 0)}")
+        except Exception:
+            print(f"{i}. {report_file.name}（读取失败）")
 
-                                if lang_choice == '1':
-                                    language_filter = 'all'
-                                    break
-                                elif lang_choice == '2':
-                                    language_filter = 'english'
-                                    break
-                                elif lang_choice == '3':
-                                    language_filter = 'chinese'
-                                    break
-                                else:
-                                    print("无效选择，请输入 1-3 之间的数字")
 
-                    print(f"\n开始下载: {theme.display_name}")
-                    print(f"目录: {theme.directory}")
-                    if theme.has_language_filter:
-                        filter_desc = {
-                            'all': '全部版本 (英文 + 中文)',
-                            'english': '仅英文版本',
-                            'chinese': '仅中文版本'
-                        }
-                        print(f"语言过滤: {filter_desc[language_filter]}")
-                    print("-" * 40)
+def _prompt_cancer_from_list(downloader: NCCNDownloaderV2, theme: ThemeConfig) -> Optional[str]:
+    """从内置癌种列表中选择（二级菜单）。"""
+    print("\n📋 癌种类型筛选:")
+    print("  0. 全部癌种（默认）")
+    print("  L. 查看/刷新NCCN癌种列表")
+    print("  K. 手工输入关键词，例如 breast / 乳腺 / lung,colorectal")
+    print("  或直接输入癌种编号/名称（支持中英文）")
 
-                    success = downloader.download_theme(choice, language_filter)
+    while True:
+        choice = input("请选择癌种 (0/L/K/名称, 默认0): ").strip()
+        if not choice:
+            return None
+        key = choice.lower()
+        if key == '0':
+            return None
+        if key == 'l':
+            refresh = input("是否强制刷新NCCN癌种列表? (y/N): ").strip().lower() in ['y', 'yes', '是']
+            items = downloader._discover_cancer_types_from_page(refresh=refresh)
+            print(f"\n找到 {len(items)} 个癌种:")
+            for i, item in enumerate(items, 1):
+                print(f"  {i}. {item}")
+            print("  0. 全部癌种")
+            print("  K. 手工输入关键词")
+            continue
+        if key == 'k':
+            return input("请输入癌种关键词（逗号分隔）: ").strip()
+        return choice
 
-                    if success:
-                        print(f"\n✅ {theme.display_name} 下载完成!")
-                    else:
-                        print(f"\n❌ {theme.display_name} 下载失败!")
 
-                    input("\n按回车键返回主菜单...")
-                else:
-                    print("无效选择，请输入 1-7 之间的数字")
+def main(config_path: Optional[str] = None, download_dir: Optional[str] = None):
+    """主函数：经典菜单 + 二级菜单（语言/癌种）+ PDF清单选择。"""
+    print("=" * 60)
+    print("    NCCN指南下载工具 v2.3")
+    print("    支持癌种筛选、语言筛选、PDF清单选择与 ncd CLI")
+    print("=" * 60)
 
-            except KeyboardInterrupt:
-                print("\n\n用户中断操作")
+    config = _load_main_config(config_path=config_path)
+    if not config:
+        return
+
+    downloader = NCCNDownloaderV2(config)
+    if download_dir:
+        downloader.base_download_dir = Path(download_dir).expanduser().resolve()
+        downloader.logs_dir = downloader.base_download_dir / 'logs'
+        downloader.setup_directories()
+
+    print("\n正在测试认证...")
+    if not downloader.authenticate():
+        print("认证失败，请检查认证信息")
+        return
+
+    print("认证成功!\n")
+
+    while True:
+        print("\n请选择要下载的主题:")
+        print("=" * 60)
+        for key, theme in NCCNDownloaderV2.THEMES.items():
+            print(f"{key}. {theme.display_name}")
+            print(f"   {theme.description}")
+            print(f"   目录: {theme.directory}")
+            print()
+        print(f"{len(NCCNDownloaderV2.THEMES) + 1}. 查看下载统计")
+        print(f"{len(NCCNDownloaderV2.THEMES) + 2}. 退出")
+
+        try:
+            max_choice = len(NCCNDownloaderV2.THEMES) + 2
+            choice = input(f"\n请输入选择 (1-{max_choice}): ").strip()
+
+            if not choice:
+                continue
+
+            if choice == str(max_choice):
+                print("感谢使用NCCN下载工具!")
                 break
-            except Exception as e:
-                print(f"\n发生错误: {str(e)}")
-                input("按回车键继续...")
+            elif choice == str(max_choice - 1):
+                _show_download_stats(downloader)
+                input("\n按回车键返回主菜单...")
+            elif choice in NCCNDownloaderV2.THEMES:
+                theme = NCCNDownloaderV2.THEMES[choice]
+                print(f"\n{'=' * 60}")
+                print(f"主题: {theme.display_name}")
+                print(f"目录: {theme.directory}")
+                print(f"{'=' * 60}")
 
-    except Exception as e:
-        print(f"程序执行出错: {str(e)}")
-        import traceback
-        traceback.print_exc()
+                # --- 二级菜单：语言筛选 ---
+                language_filter = 'all'
+                needs_language = theme.has_language_filter or theme.category in [
+                    'category_1', 'category_3', 'patient_guidelines_english',
+                    'patient_guidelines_chinese', 'patient_translations', 'clinical_translations'
+                ]
+                if needs_language:
+                    language_filter = _prompt_language_filter('1')
+                    print(f"✅ 语言筛选: {NCCNDownloaderV2.language_group_label(language_filter)}")
 
+                # --- 二级菜单：癌种筛选 ---
+                cancer_filter = None
+                if theme.category in ['category_1', 'category_3']:
+                    cancer_filter = _prompt_cancer_from_list(downloader, theme)
+                    if cancer_filter:
+                        print(f"✅ 癌种筛选: {cancer_filter}")
+                    else:
+                        print("✅ 癌种筛选: 全部")
+
+                # --- 获取 PDF 链接 ---
+                print(f"\n🔍 正在获取PDF链接...")
+                print(f"   主题: {theme.display_name}")
+                print(f"   语言: {NCCNDownloaderV2.language_group_label(language_filter)}")
+                print(f"   癌种: {cancer_filter or '全部'}")
+
+                pdf_links = downloader._get_pdf_links(theme, language_filter, cancer_filter)
+                if not pdf_links:
+                    print("❌ 未找到PDF链接")
+                    input("\n按回车键返回主菜单...")
+                    continue
+
+                # --- PDF 清单选择 ---
+                selected_pdfs = _select_pdf_list(pdf_links)
+                if not selected_pdfs:
+                    print("未选择任何文件，返回主菜单。")
+                    input("\n按回车键返回主菜单...")
+                    continue
+
+                # --- 下载确认 ---
+                if not _confirm_download(theme.display_name, language_filter, cancer_filter):
+                    print("已取消下载")
+                    input("\n按回车键返回主菜单...")
+                    continue
+
+                # --- 执行下载 ---
+                success = downloader.download_theme(choice, language_filter, cancer_filter, pdf_selection=selected_pdfs)
+                print(f"\n{'✅' if success else '❌'} 下载完成" if success else f"\n❌ {theme.display_name} 下载失败!")
+                input("\n按回车键返回主菜单...")
+            else:
+                print(f"无效选择，请输入 1-{max_choice}")
+
+        except KeyboardInterrupt:
+            print("\n\n用户中断操作")
+            break
+        except Exception as e:
+            print(f"\n发生错误: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            input("按回车键继续...")
 
 if __name__ == "__main__":
     main()

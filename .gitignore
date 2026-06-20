@@ -6,3 +6,11 @@ config.json
 nccn_downloads/
 .spec-workflow/
 .claude/
+.env
+
+# 系统文件
+.DS_Store
+
+# Python缓存
+__pycache__/
+*.pyc

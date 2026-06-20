@@ -7,12 +7,24 @@
   },
   "download_settings": {
     "max_retries": 3,
-    "timeout": 30,
-    "concurrent_downloads": 3,
-    "chunk_size": 8192
+    "retry_delay": 5,
+    "request_delay": [2, 5],
+    "min_file_size": 102400,
+    "timeout": 30
   },
   "directories": {
     "base_download_dir": "nccn_downloads",
     "logs_dir": "logs"
+  },
+  "rag": {
+    "mineru_mode": "flash",
+    "mineru_language": "en",
+    "chunk_size": 1200,
+    "translate_base_url": "https://api.siliconflow.cn/v1",
+    "translate_model": "glm-4.5-air",
+    "ocr_backend": "mineru",
+    "deepseek_ocr_base_url": "https://api.siliconflow.cn/v1",
+    "deepseek_ocr_model": "deepseek-ai/DeepSeek-OCR",
+    "deepseek_ocr_max_pages": 0
   }
 }
