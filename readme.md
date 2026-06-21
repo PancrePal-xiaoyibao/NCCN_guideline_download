@@ -37,6 +37,88 @@ pip install requests beautifulsoup4 tqdm
 
 如果`tqdm`未安装，工具会自动降级到简单进度显示。
 
+## 配置认证（必须完成，否则无法下载）
+
+工具启动时会自动检查配置文件，配置有问题时给出详细提示和操作指引，**配置正确才会继续运行**。
+
+### 配置文件位置
+
+两个文件均放在**项目根目录**（与 `download_NCCN_Guide_v2_menu.py` 同级）：
+
+```
+config.json               ← 认证配置文件（需手动创建）
+extracted_cookies.txt     ← Cookie 文件（Cookie 认证时必须）
+```
+
+### 方式一：Cookie 认证（推荐）
+
+**步骤 1**：从模板创建配置文件
+
+```bash
+cp config.json.template config.json
+```
+
+`config.json` 默认内容（`method` 已设为 `cookie`，无需修改）：
+
+```json
+{
+  "authentication": {
+    "method": "cookie",
+    "cookie_file": "extracted_cookies.txt"
+  }
+}
+```
+
+**步骤 2**：获取 NCCN Cookie
+
+1. 用浏览器打开 https://www.nccn.org/ 并登录
+2. 按 **F12** 打开开发者工具，切换到 **Network（网络）** 标签
+3. 刷新页面，点击任意请求
+4. 在 **Headers → Request Headers** 中找到 **`Cookie:`** 一行
+5. 复制该行冒号后面的全部内容
+
+**步骤 3**：保存 Cookie 到文件
+
+将复制的 Cookie 字符串粘贴到 `extracted_cookies.txt`（整个文件只需一行）：
+
+```bash
+echo '<your-cookie-string>' > extracted_cookies.txt
+```
+
+### 方式二：用户名/密码认证
+
+编辑 `config.json`：
+
+```json
+{
+  "authentication": {
+    "method": "username_password",
+    "username": "your_email@example.com",
+    "password": "your_nccn_password"
+  }
+}
+```
+
+### 验证配置
+
+运行脚本后会立即显示检查结果：
+
+```
+✅ 成功读取配置文件: /path/to/config.json
+✅ 认证方式: Cookie 文件  (/path/to/extracted_cookies.txt)
+```
+
+配置有问题时输出详细指引，例如：
+
+```
+❌ Cookie 文件不存在: /path/to/extracted_cookies.txt
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📖  配置操作指引
+  第一步：登录 NCCN 网站 ...
+  第二步：复制 Cookie ...
+  第三步：保存到 Cookie 文件 ...
+```
+
 ## 使用方法
 
 ### 1. 交互式菜单
@@ -244,6 +326,13 @@ python3 -m py_compile download_NCCN_Guide_v2_menu.py ncd.py nccn_rag.py
 ```
 
 ## 版本更新
+
+### v2.4.0 更新内容
+- ✅ 启动时自动检查 `config.json` 和 `extracted_cookies.txt` 配置状态
+- ✅ 配置缺失/格式错误/内容为空时给出分步操作指引（含绝对路径）
+- ✅ 占位符未替换检测（`<your NCCN email>`、`your_password_here`）
+- ✅ Cookie 格式基础有效性验证
+- ✅ 配置模板 `config.json.template` 默认改为 Cookie 认证方式
 
 ### v2.3.0 更新内容
 - ✅ 完整 65 种癌种列表（从 NCCN 官网提取，含中英文别名）

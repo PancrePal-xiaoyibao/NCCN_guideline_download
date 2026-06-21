@@ -2568,24 +2568,144 @@ class NCCNDownloaderV2:
 
 
 
-def _load_main_config(config_path: Optional[str] = None) -> Optional[Dict[str, Any]]:
-    """读取 config.json，并允许环境变量覆盖认证配置。"""
-    config_file = Path(config_path or 'config.json')
-    if not config_file.is_absolute():
-        config_file = Path(__file__).resolve().parent / config_file
+def _print_config_guide(script_dir: Path, method: str = 'cookie') -> None:
+    """打印配置操作指引。"""
+    print()
+    print("━" * 60)
+    print("📖  配置操作指引")
+    print("━" * 60)
 
-    if not os.path.exists(config_file):
-        print(f"❌ 配置文件 {config_file} 不存在")
-        print("请创建config.json配置文件")
+    if method in ('cookie', ''):
+        print("""
+【Cookie 认证配置步骤】（推荐，当前配置方式）
+
+  第一步：登录 NCCN 网站
+  ┌─────────────────────────────────────────────────────┐
+  │  1. 用浏览器打开  https://www.nccn.org/             │
+  │  2. 点击右上角 "Log In"，输入账号密码登录           │
+  └─────────────────────────────────────────────────────┘
+
+  第二步：复制 Cookie
+  ┌─────────────────────────────────────────────────────┐
+  │  Chrome / Edge:                                     │
+  │    ① 按 F12 打开开发者工具                          │
+  │    ② 切换到 "Network（网络）" 标签                  │
+  │    ③ 刷新页面，点击任意请求                         │
+  │    ④ 在 "Headers → Request Headers" 中              │
+  │       找到 "Cookie:" 一行                           │
+  │    ⑤ 复制该行冒号后面的全部内容                     │
+  └─────────────────────────────────────────────────────┘
+
+  第三步：保存到 Cookie 文件
+  ┌─────────────────────────────────────────────────────┐
+  │  将复制的 Cookie 字符串粘贴到：                     │
+  │    {cookie_file}
+  │  （整个文件只需一行，即 Cookie 字符串本身）         │
+  └─────────────────────────────────────────────────────┘
+
+  详细图文说明请参阅：
+    {guide_file}
+""".format(
+            cookie_file=str(script_dir / 'extracted_cookies.txt'),
+            guide_file=str(script_dir / 'how_to_get_NCCN_cookie.md'),
+        ))
+
+    if method == 'username_password':
+        print("""
+【用户名/密码 认证配置步骤】
+
+  编辑配置文件 {config_file}，
+  将 authentication 部分改为：
+  ┌─────────────────────────────────────────────────────┐
+  │  {{                                                 │
+  │    "authentication": {{                             │
+  │      "method": "username_password",                 │
+  │      "username": "your_email@example.com",          │
+  │      "password": "your_nccn_password"               │
+  │    }}                                               │
+  │  }}                                                 │
+  └─────────────────────────────────────────────────────┘
+""".format(config_file=str(script_dir / 'config.json')))
+
+    print("""  如需切换认证方式，可编辑 config.json 中 "method" 字段：
+    "method": "cookie"            ← 使用 Cookie 认证（推荐）
+    "method": "username_password" ← 使用账号密码认证
+
+  配置文件模板位于：
+    {template_file}
+""".format(template_file=str(script_dir / 'config.json.template')))
+    print("━" * 60)
+
+
+def _check_config_file(config_file: Path) -> Optional[Dict[str, Any]]:
+    """检查 config.json 是否存在且格式正确，返回配置数据或 None。"""
+    script_dir = config_file.resolve().parent
+
+    if not config_file.exists():
+        print(f"\n❌ 未找到配置文件: {config_file}")
+        print(f"   请将 config.json.template 复制为 config.json 并填写认证信息。")
+        _print_config_guide(script_dir)
         return None
 
     try:
         with open(config_file, 'r', encoding='utf-8') as f:
             config_data = json.load(f)
-        print(f"✅ 成功读取配置文件 {config_file}")
-    except Exception as e:
-        print(f"❌ 读取配置文件失败: {e}")
+    except json.JSONDecodeError as e:
+        print(f"\n❌ config.json 格式错误（JSON 解析失败）: {e}")
+        print(f"   请检查 {config_file} 的 JSON 语法，可参考模板：")
+        print(f"   {script_dir / 'config.json.template'}")
         return None
+    except Exception as e:
+        print(f"\n❌ 读取配置文件失败: {e}")
+        return None
+
+    return config_data
+
+
+def _check_cookie_file(cookie_file_path: Path, script_dir: Path) -> bool:
+    """检查 Cookie 文件是否存在且非空，返回 True/False。"""
+    if not cookie_file_path.exists():
+        print(f"\n❌ Cookie 文件不存在: {cookie_file_path}")
+        _print_config_guide(script_dir, method='cookie')
+        return False
+
+    try:
+        content = cookie_file_path.read_text(encoding='utf-8').strip()
+    except Exception as e:
+        print(f"\n❌ 读取 Cookie 文件失败: {e}")
+        return False
+
+    if not content:
+        print(f"\n❌ Cookie 文件内容为空: {cookie_file_path}")
+        print("   Cookie 文件不能为空，请按以下步骤重新获取 Cookie：")
+        _print_config_guide(script_dir, method='cookie')
+        return False
+
+    # 简单有效性检测：Cookie 字符串通常包含 '=' 和 ';'
+    if '=' not in content:
+        print(f"\n⚠️  Cookie 文件内容格式可能有误: {cookie_file_path}")
+        print("   标准 Cookie 字符串应形如: name1=value1; name2=value2; ...")
+        print("   如果下载时遇到认证失败，请重新获取 Cookie。")
+        print(f"   参阅: {script_dir / 'how_to_get_NCCN_cookie.md'}")
+
+    return True
+
+
+def _load_main_config(config_path: Optional[str] = None) -> Optional[Dict[str, Any]]:
+    """读取 config.json，并允许环境变量覆盖认证配置。
+    启动时进行全面的配置检查，发现问题时给出详细操作指引。
+    """
+    config_file = Path(config_path or 'config.json')
+    if not config_file.is_absolute():
+        config_file = Path(__file__).resolve().parent / config_file
+    script_dir = config_file.resolve().parent
+
+    # ── 第一步：检查 config.json ──────────────────────────────
+    config_data = _check_config_file(config_file)
+    if config_data is None:
+        return None
+
+    print(f"✅ 成功读取配置文件: {config_file}")
 
     auth_config = config_data.get('authentication', {}) or {}
     method = os.getenv('NCCN_AUTH_METHOD') or auth_config.get('method', 'username_password')
@@ -2594,44 +2714,53 @@ def _load_main_config(config_path: Optional[str] = None) -> Optional[Dict[str, A
     cookie_file = os.getenv('NCCN_COOKIE_FILE') or auth_config.get('cookie_file', 'extracted_cookies.txt')
     cookie_file_path = Path(cookie_file).expanduser()
     if not cookie_file_path.is_absolute():
-        cookie_file_path = config_file.resolve().parent / cookie_file_path
+        cookie_file_path = script_dir / cookie_file_path
 
-    config = {}
+    config: Dict[str, Any] = {}
+
+    # ── 第二步：按认证方式检查必要字段 ───────────────────────
     if method == 'username_password':
-        if not username or not password or password == 'your_password_here':
-            print("❌ 用户名/密码认证配置不完整")
-            print("   请在config.json或环境变量 NCCN_USERNAME/NCCN_PASSWORD 中设置")
+        issues = []
+        if not username or username == '<your NCCN email>':
+            issues.append("username（NCCN 登录邮箱）未填写")
+        if not password or password in ('your_password_here', '<your_password_here>', ''):
+            issues.append("password（NCCN 登录密码）未填写或仍为模板占位符")
+
+        if issues:
+            print(f"\n❌ 用户名/密码认证配置不完整，发现以下问题：")
+            for i, issue in enumerate(issues, 1):
+                print(f"   {i}. {issue}")
+            _print_config_guide(script_dir, method='username_password')
             return None
+
         config['auth_method'] = 'username_password'
         config['username'] = username
         config['password'] = password
-        print(f"✅ 使用用户名认证: {username}")
+        print(f"✅ 认证方式: 用户名/密码  ({username})")
+
     elif method == 'cookie':
         env_cookie = os.getenv('NCCN_COOKIE')
         if env_cookie:
             config['auth_method'] = 'cookie'
             config['cookie'] = env_cookie
-            print("✅ 使用 NCCN_COOKIE 环境变量认证")
+            print("✅ 认证方式: Cookie（来自环境变量 NCCN_COOKIE）")
         else:
-            if not os.path.exists(cookie_file_path):
-                print(f"❌ Cookie文件 {cookie_file_path} 不存在")
-                print("请确保extracted_cookies.txt文件存在，或设置 NCCN_COOKIE_FILE/NCCN_COOKIE")
+            # ── 第三步：检查 extracted_cookies.txt ──────────────
+            if not _check_cookie_file(cookie_file_path, script_dir):
                 return None
-            try:
-                with open(cookie_file_path, 'r', encoding='utf-8') as f:
-                    cookie_content = f.read().strip()
-                if not cookie_content:
-                    print(f"❌ Cookie文件 {cookie_file} 为空")
-                    return None
-                config['auth_method'] = 'cookie'
-                config['cookie_file'] = str(cookie_file_path)
-                print(f"✅ 使用Cookie认证: {cookie_file_path}")
-            except Exception as e:
-                print(f"❌ 读取Cookie文件失败: {e}")
-                return None
+            config['auth_method'] = 'cookie'
+            config['cookie_file'] = str(cookie_file_path)
+            print(f"✅ 认证方式: Cookie 文件  ({cookie_file_path})")
+
     else:
-        print(f"❌ 不支持的认证方式: {method}")
+        print(f"\n❌ 不支持的认证方式: {method!r}")
+        print("   config.json 中 \"method\" 应为 \"cookie\" 或 \"username_password\"")
+        _print_config_guide(script_dir)
         return None
+
+    # 透传下载设置
+    if 'download_settings' in config_data:
+        config['download_settings'] = config_data['download_settings']
 
     return config
 
